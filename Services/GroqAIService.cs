@@ -21,20 +21,16 @@ public class GroqAIService : IGroqAIService
 
     public async Task<string> GenerateSummaryAsync(LogAnalysisResult analysis, string? requestedModel = null)
     {
-        var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+        var apiKey = GetApiKey();
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            apiKey = _settings.ApiKey;
-        }
-
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            return "⚠️ **GROQ_API_KEY Ortam Değişkeni Bulunamadı!**\n\nLütfen terminalinizde veya çalışma ortamınızda `export GROQ_API_KEY=\"gsk_...\"` komutu ile API anahtarınızı tanımlayın.";
+            _logger.LogWarning("GROQ_API_KEY ortam değişkeni veya konfigürasyonu tanımlanmamış.");
+            return "⚠️ **GROQ_API_KEY Ortam Değişkeni Bulunamadı!**\n\nLütfen ortamınızda `export GROQ_API_KEY=\"gsk_...\"` komutu ile API anahtarınızı tanımlayın.";
         }
 
         var selectedModel = !string.IsNullOrWhiteSpace(requestedModel)
             ? requestedModel
-            : (!string.IsNullOrWhiteSpace(_settings.ModelId) ? _settings.ModelId : "qwen/qwen3.8-27b");
+            : _settings.ModelId;
 
         var promptPayload = BuildPromptPayload(analysis);
 
@@ -73,8 +69,8 @@ public class GroqAIService : IGroqAIService
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Groq API Error: {StatusCode} - {Body}", response.StatusCode, responseJson);
-                return $"❌ **Groq API Hata Döndürdü ({response.StatusCode}):**\n```json\n{responseJson}\n```";
+                _logger.LogError("Groq API Error: StatusCode {StatusCode}, Response Body: {Body}", response.StatusCode, responseJson);
+                return "❌ **Groq AI servisi ile iletişim kurulurken bir hata oluştu.** Lütfen API anahtarınızı ve model yapılandırmanızı kontrol edin.";
             }
 
             using var doc = JsonDocument.Parse(responseJson);
@@ -88,23 +84,18 @@ public class GroqAIService : IGroqAIService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Groq API çağrısı sırasında hata oluştu.");
-            return $"❌ **AI Analiz Hatası:** {ex.Message}";
+            _logger.LogError(ex, "Groq AI servis çağrısı sırasında beklenmeyen bir hata oluştu.");
+            return "❌ **AI Analiz Hatası:** Analiz raporu oluşturulurken sunucu tarafında bir hata meydana geldi.";
         }
     }
 
     public async Task<List<string>> GetAvailableModelsAsync()
     {
-        var rawModels = new List<string>();
-        var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+        var apiKey = GetApiKey();
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            apiKey = _settings.ApiKey;
-        }
-
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            return new List<string> { "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile" };
+            _logger.LogWarning("GROQ_API_KEY eksik olduğu için model listesi çekilemedi.");
+            return new List<string>();
         }
 
         try
@@ -113,47 +104,65 @@ public class GroqAIService : IGroqAIService
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
             var response = await _httpClient.SendAsync(request);
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var responseJson = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(responseJson);
-                var data = doc.RootElement.GetProperty("data");
+                _logger.LogError("Groq API model listesi isteği başarısız oldu. HTTP {StatusCode}", response.StatusCode);
+                return new List<string>();
+            }
 
-                foreach (var element in data.EnumerateArray())
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+            var data = doc.RootElement.GetProperty("data");
+
+            var fetchedModels = new List<string>();
+            foreach (var element in data.EnumerateArray())
+            {
+                if (element.TryGetProperty("id", out var idProp))
                 {
-                    if (element.TryGetProperty("id", out var idProp))
+                    var id = idProp.GetString();
+                    if (!string.IsNullOrEmpty(id))
                     {
-                        var id = idProp.GetString();
-                        if (!string.IsNullOrEmpty(id))
-                        {
-                            rawModels.Add(id);
-                        }
+                        fetchedModels.Add(id);
                     }
                 }
             }
+
+            // Filter out non-chat models (audio, prompt-guards)
+            var chatModels = fetchedModels
+                .Where(m => !m.Contains("whisper", StringComparison.OrdinalIgnoreCase) &&
+                            !m.Contains("guard", StringComparison.OrdinalIgnoreCase) &&
+                            !m.Contains("orpheus", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(m => GetModelPriority(m))
+                .ToList();
+
+            return chatModels;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Groq aktif model listesi çekilemedi.");
+            _logger.LogError(ex, "Groq aktif model listesi çekilirken beklenmeyen hata oluştu.");
+            return new List<string>();
         }
+    }
 
-        // Filter out audio (whisper) and guard/safeguard models
-        var chatModels = rawModels
-            .Where(m => !m.Contains("whisper", StringComparison.OrdinalIgnoreCase) &&
-                        !m.Contains("guard", StringComparison.OrdinalIgnoreCase) &&
-                        !m.Contains("orpheus", StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(m => m.Contains("qwen3.8", StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(m => m.Contains("gpt-oss-120b", StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(m => m.Contains("qwen3.6", StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(m => m.Contains("70b", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+    private string GetApiKey()
+    {
+        var envKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+        return !string.IsNullOrWhiteSpace(envKey) ? envKey : _settings.ApiKey;
+    }
 
-        if (!chatModels.Any())
+    private int GetModelPriority(string modelId)
+    {
+        if (_settings.PreferredModels != null && _settings.PreferredModels.Any())
         {
-            chatModels = new List<string> { "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "qwen/qwen3.6-27b" };
+            int index = _settings.PreferredModels.FindIndex(pm => modelId.Contains(pm, StringComparison.OrdinalIgnoreCase));
+            if (index >= 0) return index;
         }
 
-        return chatModels;
+        if (modelId.Contains("qwen3.8", StringComparison.OrdinalIgnoreCase)) return 10;
+        if (modelId.Contains("gpt-oss-120b", StringComparison.OrdinalIgnoreCase)) return 11;
+        if (modelId.Contains("qwen3.6", StringComparison.OrdinalIgnoreCase)) return 12;
+
+        return 100;
     }
 
     private static string BuildPromptPayload(LogAnalysisResult analysis)

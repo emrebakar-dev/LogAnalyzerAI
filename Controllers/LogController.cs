@@ -46,8 +46,8 @@ public class LogController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Log dosyası işlenirken hata oluştu.");
-            return StatusCode(500, new { message = "Log dosyası okunamadı: " + ex.Message });
+            _logger.LogError(ex, "Log dosyası ayrıştırılırken sunucu hatası oluştu. Dosya Adı: {FileName}", file.FileName);
+            return StatusCode(500, new { message = "Log dosyası ayrıştırılırken sunucu tarafında bir hata meydana geldi." });
         }
     }
 
@@ -69,19 +69,27 @@ public class LogController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "AI Raporu oluşturulurken hata.");
-            return StatusCode(500, new { message = "AI Raporu oluşturulamadı: " + ex.Message });
+            _logger.LogError(ex, "AI Raporu oluşturulurken sunucu tarafında hata meydana geldi.");
+            return StatusCode(500, new { message = "AI özet raporu oluşturulurken sunucu tarafında bir hata meydana geldi." });
         }
     }
 
     /// <summary>
-    /// Groq API üzerindeki aktif kullanabilir modelleri listeler.
+    /// Groq API üzerindeki aktif kullanılabilir modelleri listeler.
     /// </summary>
     [HttpGet("models")]
     public async Task<IActionResult> GetModels()
     {
-        var models = await _groqAIService.GetAvailableModelsAsync();
-        return Ok(models);
+        try
+        {
+            var models = await _groqAIService.GetAvailableModelsAsync();
+            return Ok(models);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Aktif model listesi çekilirken sunucu hatası oluştu.");
+            return StatusCode(500, new { message = "Aktif model listesi çekilemedi." });
+        }
     }
 }
 
