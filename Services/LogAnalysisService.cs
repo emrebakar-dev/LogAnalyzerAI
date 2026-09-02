@@ -4,16 +4,22 @@ namespace LogAnalyzerAI.Services;
 
 public class LogAnalysisService : ILogAnalysisService
 {
-    public LogAnalysisResult AnalyzeLogs(List<LogEntry> entries)
+    public LogAnalysisResult AnalyzeLogs(IEnumerable<LogEntry> entries)
     {
-        if (entries == null || !entries.Any())
+        if (entries == null)
+        {
+            return new LogAnalysisResult();
+        }
+
+        var entryList = entries.ToList();
+        if (!entryList.Any())
         {
             return new LogAnalysisResult();
         }
 
         // LINQ: Log level distribution
-        var logLevelCounts = entries
-            .GroupBy(e => e.LogLevel)
+        var logLevelCounts = entryList
+            .GroupBy(e => e.LogLevel ?? "INFO")
             .ToDictionary(g => g.Key, g => g.Count());
 
         int infoCount = logLevelCounts.GetValueOrDefault("INFO", 0);
@@ -21,7 +27,7 @@ public class LogAnalysisService : ILogAnalysisService
         int errorCount = logLevelCounts.GetValueOrDefault("ERROR", 0) + logLevelCounts.GetValueOrDefault("FATAL", 0);
 
         // LINQ: Top 5 most frequent error messages
-        var topErrors = entries
+        var topErrors = entryList
             .Where(e => e.LogLevel == "ERROR" || e.LogLevel == "FATAL")
             .GroupBy(e => TruncateMessage(e.Message))
             .OrderByDescending(g => g.Count())
@@ -34,8 +40,8 @@ public class LogAnalysisService : ILogAnalysisService
             .ToList();
 
         // LINQ: Top 5 sources producing errors/warnings
-        var topSources = entries
-            .Where(e => e.LogLevel == "ERROR" || e.LogLevel == "WARN" || e.LogLevel == "FATAL")
+        var topSources = entryList
+            .Where(e => (e.LogLevel == "ERROR" || e.LogLevel == "WARN" || e.LogLevel == "FATAL") && !string.IsNullOrWhiteSpace(e.Source))
             .GroupBy(e => e.Source)
             .OrderByDescending(g => g.Count())
             .Take(5)
@@ -47,7 +53,7 @@ public class LogAnalysisService : ILogAnalysisService
             .ToList();
 
         // LINQ: Distinct sample error logs for AI prompt context
-        var sampleErrorLogs = entries
+        var sampleErrorLogs = entryList
             .Where(e => e.LogLevel == "ERROR" || e.LogLevel == "FATAL")
             .DistinctBy(e => e.Message)
             .Take(5)
@@ -55,7 +61,7 @@ public class LogAnalysisService : ILogAnalysisService
 
         return new LogAnalysisResult
         {
-            TotalLogCount = entries.Count,
+            TotalLogCount = entryList.Count,
             InfoCount = infoCount,
             WarningCount = warnCount,
             ErrorCount = errorCount,
@@ -66,7 +72,7 @@ public class LogAnalysisService : ILogAnalysisService
         };
     }
 
-    private static string TruncateMessage(string message)
+    private static string TruncateMessage(string? message)
     {
         if (string.IsNullOrWhiteSpace(message)) return "Empty error message";
         return message.Length > 120 ? message[..120] + "..." : message;

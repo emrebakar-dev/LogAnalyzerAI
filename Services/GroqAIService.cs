@@ -89,7 +89,7 @@ public class GroqAIService : IGroqAIService
         }
     }
 
-    public async Task<List<string>> GetAvailableModelsAsync()
+    public async Task<IReadOnlyList<string>> GetAvailableModelsAsync()
     {
         var apiKey = GetApiKey();
         if (string.IsNullOrWhiteSpace(apiKey))

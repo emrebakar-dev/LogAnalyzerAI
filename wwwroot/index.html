@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LogAnalyzer AI - Yapay Zeka Destekli Log Analitik</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Lightweight Markdown Parser -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Lightweight Markdown Parser with defer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
 </head>
 <body>
     <header class="app-header">
@@ -21,9 +21,9 @@
             <div class="model-selector-group">
                 <label for="modelSelect">AI Modeli:</label>
                 <select id="modelSelect">
-                    <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Önerilen)</option>
-                    <option value="qwen-2.5-32b">qwen-2.5-32b</option>
-                    <option value="deepseek-r1-distill-llama-70b">deepseek-r1-distill-llama-70b</option>
+                    <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b</option>
+                    <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                    <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
                 </select>
             </div>
         </div>
@@ -36,13 +36,14 @@
             <div class="drop-zone" id="dropZone">
                 <div class="drop-icon">📄</div>
                 <p>Log dosyanızı buraya sürükleyin veya <strong>dosya seçin</strong></p>
-                <span class="file-hint">Desteklenen formatlar: .log, .txt (NLog, Serilog, Custom Logs)</span>
+                <span class="file-hint">Desteklenen formatlar: .log, .txt (Max 15 MB)</span>
                 <input type="file" id="fileInput" accept=".log,.txt" hidden>
             </div>
             <div id="fileInfo" class="file-info hidden">
                 <span>Yüklenen Dosya: <strong id="fileName">...</strong></span>
                 <button id="btnAnalyze" class="btn btn-primary">⚡ Logları Analiz Et</button>
             </div>
+            <div id="errorMessage" class="error-banner hidden"></div>
         </section>
 
         <!-- Dashboard Cards Section -->
@@ -71,13 +72,13 @@
                 <div class="card">
                     <h3>🔥 En Sık Tekrar Eden Hatalar (Top 5)</h3>
                     <ul id="topErrorsList" class="data-list">
-                        <!-- Populated by JS -->
+                        <!-- Populated safely via DOM APIs -->
                     </ul>
                 </div>
                 <div class="card">
                     <h3>📍 En Sorunlu Kaynaklar (Top 5 Sources)</h3>
                     <ul id="topSourcesList" class="data-list">
-                        <!-- Populated by JS -->
+                        <!-- Populated safely via DOM APIs -->
                     </ul>
                 </div>
             </div>
@@ -94,14 +95,14 @@
         <section id="aiReportSection" class="card ai-report-card hidden">
             <div class="ai-report-header">
                 <h2>🤖 Groq AI Kök Neden & Çözüm Raporu</h2>
-                <span id="aiStatusBadge" class="badge">Model: llama-3.3-70b-versatile</span>
+                <span id="aiStatusBadge" class="badge">Model: qwen/qwen3.8-27b</span>
             </div>
             <div id="aiLoading" class="loading-state hidden">
                 <div class="spinner"></div>
                 <p>Groq AI log verilerini ve stack trace'leri inceliyor, lütfen bekleyin...</p>
             </div>
             <div id="aiReportOutput" class="markdown-body">
-                <!-- AI Markdown content rendered here -->
+                <!-- AI Markdown content rendered safely -->
             </div>
         </section>
     </main>
@@ -110,6 +111,6 @@
         <p>LogAnalyzer AI &copy; 2026 - ASP.NET Core & Groq Cloud LLM Entegrasyonu</p>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="app.js" defer></script>
 </body>
 </html>

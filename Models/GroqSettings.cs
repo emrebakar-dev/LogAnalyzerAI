@@ -1,7 +1,10 @@
+using System.Text.Json.Serialization;
+
 namespace LogAnalyzerAI.Models;
 
 public class GroqSettings
 {
+    [JsonIgnore]
     public string ApiKey { get; set; } = string.Empty;
     public string ModelId { get; set; } = "llama-3.3-70b-versatile";
     public string BaseUrl { get; set; } = "https://api.groq.com/openai/v1/";

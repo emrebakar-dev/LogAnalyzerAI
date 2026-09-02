@@ -14,11 +14,19 @@ builder.Services.AddHttpClient<IGroqAIService, GroqAIService>();
 
 var app = builder.Build();
 
+// Configure Middleware Pipeline in correct security & execution order
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.UseHttpsRedirection();
+
 // Serve wwwroot UI (index.html)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

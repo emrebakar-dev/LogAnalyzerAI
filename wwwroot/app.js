@@ -11,11 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const aiReportOutput = document.getElementById("aiReportOutput");
     const modelSelect = document.getElementById("modelSelect");
     const aiStatusBadge = document.getElementById("aiStatusBadge");
+    const errorMessageBanner = document.getElementById("errorMessage");
+
+    const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
+    const ALLOWED_EXTENSIONS = [".log", ".txt"];
 
     let currentFile = null;
     let currentAnalysisResult = null;
 
-    // Fetch models on load
+    // Fetch available models safely on load
     fetchModels();
 
     // Drag and drop handlers
@@ -45,6 +49,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function handleFileSelection(file) {
+        hideError();
+
+        // Client-side file validation
+        if (file.size > MAX_FILE_SIZE) {
+            showError("Seçilen dosya çok büyük. Lütfen 15 MB'tan küçük bir dosya seçin.");
+            return;
+        }
+
+        const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+        if (!ALLOWED_EXTENSIONS.includes(ext)) {
+            showError("Desteklenmeyen dosya türü. Lütfen .log veya .txt dosyası yükleyin.");
+            return;
+        }
+
         currentFile = file;
         fileNameDisplay.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
         fileInfo.classList.remove("hidden");
@@ -54,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAnalyze.addEventListener("click", async () => {
         if (!currentFile) return;
 
+        hideError();
         btnAnalyze.disabled = true;
         btnAnalyze.textContent = "⏳ Analiz Ediliyor...";
 
@@ -68,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) {
                 const err = await response.json();
-                alert("Hata: " + (err.message || "Analiz yapılamadı."));
+                showError(err.message || "Analiz yapılamadı.");
                 return;
             }
 
@@ -78,44 +97,74 @@ document.addEventListener("DOMContentLoaded", () => {
             dashboardSection.classList.remove("hidden");
             dashboardSection.scrollIntoView({ behavior: "smooth" });
         } catch (error) {
-            alert("Sunucu ile iletişim hatası: " + error.message);
+            showError("Sunucu ile iletişim kurulurken bir hata oluştu.");
         } finally {
             btnAnalyze.disabled = false;
             btnAnalyze.textContent = "⚡ Logları Analiz Et";
         }
     });
 
-    // Render Dashboard Cards & Lists
+    // Render Dashboard Cards & Lists using safe DOM manipulation
     function renderDashboard(data) {
-        document.getElementById("statTotal").textContent = data.totalLogCount;
-        document.getElementById("statInfo").textContent = data.infoCount;
-        document.getElementById("statWarn").textContent = data.warningCount;
-        document.getElementById("statError").textContent = data.errorCount;
+        document.getElementById("statTotal").textContent = data.totalLogCount || 0;
+        document.getElementById("statInfo").textContent = data.infoCount || 0;
+        document.getElementById("statWarn").textContent = data.warningCount || 0;
+        document.getElementById("statError").textContent = data.errorCount || 0;
 
-        // Top Errors List
+        // Top Errors List (Safe DOM creation)
         const topErrorsList = document.getElementById("topErrorsList");
-        topErrorsList.innerHTML = "";
+        clearContainer(topErrorsList);
+
         if (data.topErrors && data.topErrors.length > 0) {
             data.topErrors.forEach(err => {
                 const li = document.createElement("li");
-                li.innerHTML = `<span>${escapeHtml(err.errorMessage)}</span> <span class="count-badge">${err.count} kez</span>`;
+
+                const spanMsg = document.createElement("span");
+                spanMsg.textContent = err.errorMessage;
+
+                const spanBadge = document.createElement("span");
+                spanBadge.className = "count-badge";
+                spanBadge.textContent = `${err.count} kez`;
+
+                li.appendChild(spanMsg);
+                li.appendChild(spanBadge);
                 topErrorsList.appendChild(li);
             });
         } else {
-            topErrorsList.innerHTML = "<li><em>Hata kaydı bulunamadı.</em></li>";
+            const li = document.createElement("li");
+            const em = document.createElement("em");
+            em.textContent = "Hata kaydı bulunamadı.";
+            li.appendChild(em);
+            topErrorsList.appendChild(li);
         }
 
-        // Top Sources List
+        // Top Sources List (Safe DOM creation)
         const topSourcesList = document.getElementById("topSourcesList");
-        topSourcesList.innerHTML = "";
+        clearContainer(topSourcesList);
+
         if (data.topSources && data.topSources.length > 0) {
             data.topSources.forEach(src => {
                 const li = document.createElement("li");
-                li.innerHTML = `<span><strong>${escapeHtml(src.source)}</strong></span> <span class="count-badge">${src.count} olay</span>`;
+
+                const spanSrc = document.createElement("span");
+                const strong = document.createElement("strong");
+                strong.textContent = src.source;
+                spanSrc.appendChild(strong);
+
+                const spanBadge = document.createElement("span");
+                spanBadge.className = "count-badge";
+                spanBadge.textContent = `${src.count} olay`;
+
+                li.appendChild(spanSrc);
+                li.appendChild(spanBadge);
                 topSourcesList.appendChild(li);
             });
         } else {
-            topSourcesList.innerHTML = "<li><em>Kaynak kaydı bulunamadı.</em></li>";
+            const li = document.createElement("li");
+            const em = document.createElement("em");
+            em.textContent = "Kaynak kaydı bulunamadı.";
+            li.appendChild(em);
+            topSourcesList.appendChild(li);
         }
     }
 
@@ -123,12 +172,13 @@ document.addEventListener("DOMContentLoaded", () => {
     btnGenerateAi.addEventListener("click", async () => {
         if (!currentAnalysisResult) return;
 
+        hideError();
         const selectedModel = modelSelect.value;
         aiStatusBadge.textContent = `Model: ${selectedModel}`;
 
         aiReportSection.classList.remove("hidden");
         aiLoading.classList.remove("hidden");
-        aiReportOutput.innerHTML = "";
+        clearContainer(aiReportOutput);
         aiReportSection.scrollIntoView({ behavior: "smooth" });
 
         btnGenerateAi.disabled = true;
@@ -145,18 +195,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
             if (!response.ok) {
-                aiReportOutput.innerHTML = `<div class="error-box">❌ ${escapeHtml(data.message || "AI Raporu alınamadı.")}</div>`;
+                renderErrorBox(aiReportOutput, data.message || "AI Raporu alınamadı.");
                 return;
             }
 
-            // Render Markdown
-            if (window.marked) {
-                aiReportOutput.innerHTML = marked.parse(data.summary);
+            // Render Markdown safely
+            if (window.marked && typeof window.marked.parse === "function") {
+                const parsedHtml = window.marked.parse(data.summary);
+                aiReportOutput.innerHTML = parsedHtml;
             } else {
                 aiReportOutput.textContent = data.summary;
             }
         } catch (error) {
-            aiReportOutput.innerHTML = `<div class="error-box">❌ Bağlantı Hatası: ${escapeHtml(error.message)}</div>`;
+            renderErrorBox(aiReportOutput, "Sunucu ile bağlantı kurulamadı.");
         } finally {
             aiLoading.classList.add("hidden");
             btnGenerateAi.disabled = false;
@@ -169,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 const models = await res.json();
                 if (Array.isArray(models) && models.length > 0) {
-                    modelSelect.innerHTML = "";
+                    clearContainer(modelSelect);
                     models.forEach(model => {
                         const opt = document.createElement("option");
                         opt.value = model;
@@ -182,12 +233,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         } catch (e) {
-            console.log("Model listesi çekilemedi, varsayılan modeller kullanılıyor.");
+            console.warn("Model listesi alınamadı, varsayılan listeyle devam ediliyor.");
         }
     }
 
-    function escapeHtml(text) {
-        if (!text) return "";
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    function clearContainer(container) {
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+    }
+
+    function showError(msg) {
+        if (errorMessageBanner) {
+            errorMessageBanner.textContent = `⚠️ ${msg}`;
+            errorMessageBanner.classList.remove("hidden");
+        }
+    }
+
+    function hideError() {
+        if (errorMessageBanner) {
+            errorMessageBanner.textContent = "";
+            errorMessageBanner.classList.add("hidden");
+        }
+    }
+
+    function renderErrorBox(container, msg) {
+        clearContainer(container);
+        const div = document.createElement("div");
+        div.className = "error-box";
+        div.textContent = `❌ ${msg}`;
+        container.appendChild(div);
     }
 });

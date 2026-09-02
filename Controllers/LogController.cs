@@ -8,6 +8,9 @@ namespace LogAnalyzerAI.Controllers;
 [Route("api/[controller]")]
 public class LogController : ControllerBase
 {
+    private static readonly string[] AllowedExtensions = { ".log", ".txt" };
+    private const long MaxFileSizeBytes = 15 * 1024 * 1024; // 15 MB limit
+
     private readonly ILogParserService _parserService;
     private readonly ILogAnalysisService _analysisService;
     private readonly IGroqAIService _groqAIService;
@@ -34,6 +37,17 @@ public class LogController : ControllerBase
         if (file == null || file.Length == 0)
         {
             return BadRequest(new { message = "Lütfen geçerli bir log dosyası seçin." });
+        }
+
+        if (file.Length > MaxFileSizeBytes)
+        {
+            return BadRequest(new { message = "Dosya boyutu 15 MB sınırını aşamaz." });
+        }
+
+        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AllowedExtensions.Contains(fileExtension))
+        {
+            return BadRequest(new { message = "Sadece .log ve .txt uzantılı log dosyaları desteklenmektedir." });
         }
 
         try

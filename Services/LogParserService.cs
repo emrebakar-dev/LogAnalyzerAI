@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using LogAnalyzerAI.Models;
 
@@ -5,7 +6,6 @@ namespace LogAnalyzerAI.Services;
 
 public class LogParserService : ILogParserService
 {
-    // Regex patterns for common log entry header lines
     private static readonly Regex LogLinePattern1 = new(
         @"^(?<timestamp>\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d+)?)\s*\[(?<level>INFO|WARN|WARNING|ERR|ERROR|FATAL|DEBUG|CRITICAL|TRACE)\]\s*(?:\[(?<source>[^\]]+)\])?\s*(?<message>.*)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -24,16 +24,18 @@ public class LogParserService : ILogParserService
 
     public List<LogEntry> ParseLogContent(string content)
     {
-        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         return ParseLogStream(stream);
     }
 
     public List<LogEntry> ParseLogStream(Stream stream)
     {
         var entries = new List<LogEntry>();
-        using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
+        using var reader = new StreamReader(stream, Encoding.UTF8, leaveOpen: true);
 
         LogEntry? currentEntry = null;
+        StringBuilder? currentStackTraceBuilder = null;
+        StringBuilder? currentMessageBuilder = null;
         string? line;
 
         while ((line = reader.ReadLine()) != null)
@@ -43,14 +45,13 @@ public class LogParserService : ILogParserService
             // Check if this line is part of a stack trace for the previous entry
             if (currentEntry != null && (line.TrimStart().StartsWith("at ") || line.TrimStart().StartsWith("---") || line.TrimStart().StartsWith("Exception:")))
             {
-                if (string.IsNullOrEmpty(currentEntry.StackTrace))
+                currentStackTraceBuilder ??= new StringBuilder(currentEntry.StackTrace ?? string.Empty);
+                if (currentStackTraceBuilder.Length > 0)
                 {
-                    currentEntry.StackTrace = line;
+                    currentStackTraceBuilder.AppendLine();
                 }
-                else
-                {
-                    currentEntry.StackTrace += Environment.NewLine + line;
-                }
+                currentStackTraceBuilder.Append(line);
+                currentEntry.StackTrace = currentStackTraceBuilder.ToString();
                 continue;
             }
 
@@ -59,17 +60,23 @@ public class LogParserService : ILogParserService
             if (entry != null)
             {
                 currentEntry = entry;
+                currentStackTraceBuilder = null;
+                currentMessageBuilder = null;
                 entries.Add(currentEntry);
             }
             else if (currentEntry != null && !IsNewLogLine(line))
             {
                 // Multi-line message append
-                currentEntry.Message += " " + line.Trim();
+                currentMessageBuilder ??= new StringBuilder(currentEntry.Message);
+                currentMessageBuilder.Append(' ').Append(line.Trim());
+                currentEntry.Message = currentMessageBuilder.ToString();
             }
             else
             {
                 // Fallback for unparseable raw log line
                 currentEntry = CreateFallbackEntry(line);
+                currentStackTraceBuilder = null;
+                currentMessageBuilder = null;
                 entries.Add(currentEntry);
             }
         }
