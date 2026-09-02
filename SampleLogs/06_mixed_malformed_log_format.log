@@ -1,0 +1,10 @@
+2026/09/02 12:00:10 [INFO] LegacySystem - Service booted up cleanly.
+[WARN] 2026-09-02 12:01:22 [Cache] Cache item 'user_session_99' expired before eviction cycle.
+INVALID_RAW_HEADER_LINE --- Unexpected system kernel message received without standard timestamp format ---
+ERROR: 2026-09-02 12:05:00 [LegacyParser] NullReferenceException: Object reference not set to an instance of an object.
+   at Legacy.Parser.Core.Execute(String input) in C:\Legacy\Parser.cs:line 32
+   at Legacy.Parser.Core.ProcessBatch() in C:\Legacy\Parser.cs:line 85
+Random corrupted line #$%^&*()_::: [INFO] System is still running.
+2026-09-02 12:10:15 [ERR] [BackgroundSync] Sync failed due to network socket reset.
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer)
+2026-09-02 12:12:00 [INFO] System.Hosting - Shutting down background sync service safely.

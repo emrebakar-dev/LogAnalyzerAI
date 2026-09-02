@@ -50,3 +50,5 @@ Açılan web arayüzünden (`http://localhost:5230` veya `http://localhost:5000`
 - `02_auth_and_security_failures.log`: Brute-force giriş denemeleri & JWT token hataları.
 - `03_microservices_http_outage.log`: HTTP 503 servis kesintileri & RabbitMQ/gRPC hataları.
 - `04_clean_system_healthy.log`: Sağlıklı sistem logları.
+- `05_disk_memory_resource_exhaustion.log`: Disk doluluğu (IOException) & RAM tüketim krizleri (OutOfMemoryException).
+- `06_mixed_malformed_log_format.log`: Karışık log formatları, bozuk satırlar ve esnek parser testi.

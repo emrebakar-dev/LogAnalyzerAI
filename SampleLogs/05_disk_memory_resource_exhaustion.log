@@ -1,0 +1,11 @@
+2026-09-02 11:30:05 [INFO] [SystemMonitor] Resource usage check started. Total RAM: 16GB.
+2026-09-02 11:31:12 [WARN] [MemoryManager] High RAM consumption detected: 89% of 16GB allocated (14.2GB used).
+2026-09-02 11:32:00 [WARN] [DiskStorageService] Low disk space warning on mount '/data/logs': 45MB remaining.
+2026-09-02 11:33:45 [ERROR] [DiskStorageService] System.IO.IOException: There is not enough space on the disk. Failed to flush buffer to '/data/logs/app_20260902.log'.
+   at System.IO.FileStream.WriteNative(Byte[] array, Int32 offset, Int32 count)
+   at System.IO.StreamWriter.Flush(Boolean flushStream, Boolean flushEncoder)
+   at Enterprise.Logging.DiskLogger.WriteChunk(String data) in C:\Projects\Enterprise\DiskLogger.cs:line 98
+2026-09-02 11:35:10 [ERROR] [MemoryManager] System.OutOfMemoryException: Exception of type 'System.OutOfMemoryException' was thrown. Unable to allocate 512MB byte array in LOH (Large Object Heap).
+   at System.GC.AllocateNewArray(Int32 length)
+   at Enterprise.Services.ReportGeneratorService.BuildLargeMemoryBuffer() in C:\Projects\Enterprise\ReportGeneratorService.cs:line 210
+2026-09-02 11:36:00 [FATAL] [ProcessWorker] Worker process #4 terminated unexpectedly due to unhandled OutOfMemoryException. GC Thread dump logged.
