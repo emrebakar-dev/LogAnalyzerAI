@@ -27,13 +27,13 @@ LogAnalyzer AI, kurumsal ve kamu projelerinde yaygın olarak kullanılan **ASP.N
 
 ### 1. Repoyu Klonlayın
 ```bash
-git clone https://github.com/KULLANICI_ADI/LogAnalyzerAI.git
+git clone https://github.com/emrebakar-dev/LogAnalyzerAI.git
 cd LogAnalyzerAI
 ```
 
 ### 2. Groq API Anahtarını Tanımlayın
 ```bash
-export GROQ_API_KEY="gsk_sizin_groq_api_anahtariniz"
+export GROQ_API_KEY="gsk_your_groq_api_key_here"
 ```
 
 ### 3. Uygulamayı Başlatın
