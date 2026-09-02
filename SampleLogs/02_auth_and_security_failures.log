@@ -1,0 +1,12 @@
+2026-09-02 09:00:15 [INFO] [Security] IdentityServer initialized with RSA 2048 signing keys.
+2026-09-02 09:02:40 [WARN] [AuthService] Failed login attempt for username 'root' from IP 185.220.101.5 (Attempt 1/5)
+2026-09-02 09:02:42 [WARN] [AuthService] Failed login attempt for username 'root' from IP 185.220.101.5 (Attempt 2/5)
+2026-09-02 09:02:44 [WARN] [AuthService] Failed login attempt for username 'root' from IP 185.220.101.5 (Attempt 3/5)
+2026-09-02 09:02:46 [ERROR] [SecurityGuard] Potential brute-force attack detected from IP 185.220.101.5. IP blocked for 60 minutes.
+   at Enterprise.Security.RateLimiter.BlockIp(String ipAddress) in C:\Projects\Enterprise\SecurityGuard.cs:line 89
+2026-09-02 09:05:12 [ERROR] [TokenService] JWT validation failed: Token expired at 2026-09-02 08:00:00 UTC. User: user_7821
+   at Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerHandler.HandleAuthenticateAsync()
+2026-09-02 09:08:30 [WARN] [CorsPolicy] Access-Control-Allow-Origin blocked request from unknown domain: http://malicious-site.com
+2026-09-02 09:12:05 [ERROR] [Authorization] User 'analyst_01' attempted to access unauthorized resource '/api/admin/system-reset' (Required Role: SystemAdmin)
+   at Enterprise.Security.AuthorizationFilter.OnAuthorization(AuthorizationFilterContext context) in C:\Projects\Enterprise\AuthorizationFilter.cs:line 45
+2026-09-02 09:15:00 [INFO] [AuthService] User 'sys_admin' successfully refreshed OAuth token.

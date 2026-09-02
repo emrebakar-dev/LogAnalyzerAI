@@ -1,0 +1,28 @@
+# .NET Core & C# GitIgnore
+
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Environment & Secrets (Crucial!)
+.env
+*.env
+appsettings.Local.json
+appsettings.Development.local.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Test & Log outputs
+*.log.tmp

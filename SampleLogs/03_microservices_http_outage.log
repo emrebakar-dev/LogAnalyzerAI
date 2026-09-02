@@ -1,0 +1,12 @@
+2026-09-02 10:00:00 [INFO] [Gateway] API Gateway v2.4 initialized. Routes configured: 14 endpoints.
+2026-09-02 10:05:11 [INFO] [OrderService] Processing bulk order batch #9021 (150 items).
+2026-09-02 10:06:20 [WARN] [InventoryService] Stock level low for Item SKU #8812 (Remaining: 3).
+2026-09-02 10:07:00 [ERROR] [OrderService] HTTP 503 Service Unavailable received from http://inventory-service.local/api/items/reserve
+   at System.Net.Http.HttpClient.HandleFailure()
+   at Enterprise.Services.InventoryClient.ReserveStockAsync(Int32 itemId, Int32 quantity) in C:\Projects\Enterprise\Clients\InventoryClient.cs:line 67
+2026-09-02 10:07:05 [ERROR] [OrderService] HTTP 503 Service Unavailable received from http://inventory-service.local/api/items/reserve
+2026-09-02 10:08:15 [ERROR] [RabbitMQ] Connection to RabbitMQ Broker amqp://guest:****@localhost:5672 lost. Attempting auto-reconnect...
+   at RabbitMQ.Client.Impl.Connection.MainLoop()
+2026-09-02 10:09:30 [ERROR] [gRPCClient] gRPC call failed with StatusCode=DeadlineExceeded. Target: notification-service:50051
+   at Grpc.Core.Internal.AsyncCall.HaltingError(Status status)
+2026-09-02 10:10:00 [INFO] [RabbitMQ] Connection to RabbitMQ Broker re-established. Queue listeners active.

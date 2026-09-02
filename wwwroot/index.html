@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogAnalyzer AI - Yapay Zeka Destekli Log Analitik</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Lightweight Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="container header-container">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <div>
+                    <h1>LogAnalyzer <span>AI</span></h1>
+                    <p class="subtitle">ASP.NET Core & Groq LLM Destekli Log Analiz Platformu</p>
+                </div>
+            </div>
+            <div class="model-selector-group">
+                <label for="modelSelect">AI Modeli:</label>
+                <select id="modelSelect">
+                    <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Önerilen)</option>
+                    <option value="qwen-2.5-32b">qwen-2.5-32b</option>
+                    <option value="deepseek-r1-distill-llama-70b">deepseek-r1-distill-llama-70b</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Upload Section -->
+        <section class="card upload-card">
+            <h2>📁 Log Dosyası Yükle</h2>
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-icon">📄</div>
+                <p>Log dosyanızı buraya sürükleyin veya <strong>dosya seçin</strong></p>
+                <span class="file-hint">Desteklenen formatlar: .log, .txt (NLog, Serilog, Custom Logs)</span>
+                <input type="file" id="fileInput" accept=".log,.txt" hidden>
+            </div>
+            <div id="fileInfo" class="file-info hidden">
+                <span>Yüklenen Dosya: <strong id="fileName">...</strong></span>
+                <button id="btnAnalyze" class="btn btn-primary">⚡ Logları Analiz Et</button>
+            </div>
+        </section>
+
+        <!-- Dashboard Cards Section -->
+        <section id="dashboardSection" class="dashboard-section hidden">
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <span class="stat-title">Toplam Log</span>
+                    <span class="stat-value" id="statTotal">0</span>
+                </div>
+                <div class="stat-card info">
+                    <span class="stat-title">INFO Kayıtları</span>
+                    <span class="stat-value" id="statInfo">0</span>
+                </div>
+                <div class="stat-card warn">
+                    <span class="stat-title">WARN Uarıları</span>
+                    <span class="stat-value" id="statWarn">0</span>
+                </div>
+                <div class="stat-card error">
+                    <span class="stat-title">ERROR / FATAL Hatalar</span>
+                    <span class="stat-value" id="statError">0</span>
+                </div>
+            </div>
+
+            <!-- LINQ Analysis Tables -->
+            <div class="tables-grid">
+                <div class="card">
+                    <h3>🔥 En Sık Tekrar Eden Hatalar (Top 5)</h3>
+                    <ul id="topErrorsList" class="data-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>📍 En Sorunlu Kaynaklar (Top 5 Sources)</h3>
+                    <ul id="topSourcesList" class="data-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- AI Action Button -->
+            <div class="ai-action-bar">
+                <button id="btnGenerateAi" class="btn btn-ai">
+                    <span class="btn-icon">🤖</span> Groq AI Kök Neden Analizi Başlat
+                </button>
+            </div>
+        </section>
+
+        <!-- AI Summary Report Section -->
+        <section id="aiReportSection" class="card ai-report-card hidden">
+            <div class="ai-report-header">
+                <h2>🤖 Groq AI Kök Neden & Çözüm Raporu</h2>
+                <span id="aiStatusBadge" class="badge">Model: llama-3.3-70b-versatile</span>
+            </div>
+            <div id="aiLoading" class="loading-state hidden">
+                <div class="spinner"></div>
+                <p>Groq AI log verilerini ve stack trace'leri inceliyor, lütfen bekleyin...</p>
+            </div>
+            <div id="aiReportOutput" class="markdown-body">
+                <!-- AI Markdown content rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>LogAnalyzer AI &copy; 2026 - ASP.NET Core & Groq Cloud LLM Entegrasyonu</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+2026-09-02 08:30:00 [INFO] [System.Hosting] Application started. Listening on http://localhost:5000
+2026-09-02 08:31:12 [INFO] [AuthService] User 'admin' logged in successfully from IP 192.168.1.50
+2026-09-02 08:35:44 [WARN] [DatabaseService] Database connection pool reaching 85% capacity (17/20 active connections).
+2026-09-02 08:36:01 [ERROR] [DatabaseService] Connection timeout while executing query: SELECT * FROM Orders WHERE Status = 'PENDING'
+   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection)
+   at System.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection)
+   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning()
+2026-09-02 08:37:10 [WARN] [PaymentGateway] Payment provider API responded with HTTP 429 Too Many Requests. Retrying in 5 seconds...
+2026-09-02 08:37:16 [ERROR] [PaymentGateway] Payment processing failed for OrderId #48291. Provider timeout.
+   at Enterprise.PaymentGateway.ProcessPayment(OrderRequest request) in C:\Projects\Enterprise\PaymentGateway.cs:line 142
+   at Enterprise.Controllers.CheckoutController.SubmitOrder(OrderRequest request) in C:\Projects\Enterprise\CheckoutController.cs:line 58
+2026-09-02 08:38:00 [INFO] [AuthService] User 'john_doe' logged in successfully.
+2026-09-02 08:40:22 [ERROR] [DatabaseService] Connection timeout while executing query: SELECT * FROM Orders WHERE Status = 'PENDING'
+   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection)
+2026-09-02 08:42:15 [ERROR] [RedisCacheService] Redis server connection refused at 127.0.0.1:6379. Falling back to in-memory cache.
+   at StackExchange.Redis.ConnectionMultiplexer.Connect()
+2026-09-02 08:45:00 [INFO] [System.CleanupJob] Daily cache cleanup completed in 1.4 seconds.
+2026-09-02 08:48:33 [ERROR] [DatabaseService] Connection timeout while executing query: SELECT * FROM Orders WHERE Status = 'PENDING'

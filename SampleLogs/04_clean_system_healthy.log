@@ -1,0 +1,7 @@
+2026-09-02 11:00:00 [INFO] [System.Hosting] Application starting up... Environment: Production
+2026-09-02 11:00:02 [INFO] [DbContext] Database migrations checked and applied successfully.
+2026-09-02 11:00:05 [INFO] [WorkerService] Background task 'MetricsReporter' registered to run every 15 minutes.
+2026-09-02 11:05:00 [INFO] [HealthCheck] System health check status: HEALTHY (Memory: 142MB, CPU: 1.2%).
+2026-09-02 11:15:00 [INFO] [WorkerService] MetricsReporter executed successfully. Reported 340 API requests processed.
+2026-09-02 11:20:45 [INFO] [AuthService] User 'super_admin' authenticated successfully.
+2026-09-02 11:30:00 [INFO] [HealthCheck] System health check status: HEALTHY (Memory: 148MB, CPU: 0.8%).
