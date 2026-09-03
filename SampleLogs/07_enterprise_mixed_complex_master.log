@@ -1,0 +1,52 @@
+2026-09-03 08:00:00.102 [INFO] [System.Hosting] ASP.NET Core Web API v8.0.4 initialized on http://0.0.0.0:5000 (Environment: Production)
+2026-09-03 08:00:00.250 [INFO] [DatabaseService] Entity Framework Core initialized. Migration status: UP-TO-DATE. Connection pool size: 50
+2026-09-03 08:00:01.005 [INFO] [RabbitMQBroker] Connected to amqp://guest:****@rabbitmq-cluster.local:5672/vhost_prod
+2026-09-03 08:01:15.340 [INFO] [AuthService] User 'system_admin' successfully authenticated from IP 10.240.0.15 (Method: OAuth22FA)
+2026-09-03 08:02:40.890 [DEBUG] [OrderProcessor] Checking pending orders queue... Found 14 items.
+2026-09-03 08:04:12.110 [INFO] [OrderProcessor] Batch #4012 processing started for CustomerId #88120
+2026-09-03 08:05:00.500 [WARN] [RedisCache] High memory pressure on Redis Node 1 (127.0.0.1:6379). Used memory: 1.8GB / 2.0GB (90%).
+2026-09-03 08:06:22.012 [ERROR] [RedisCache] ConnectionRefusedException: Unable to connect to Redis server at 127.0.0.1:6379. Endpoint unreachable.
+   at StackExchange.Redis.ConnectionMultiplexer.ConnectImpl(ConfigurationOptions configuration, TextWriter log)
+   at Enterprise.Caching.RedisCacheService.GetAsync[T](String key) in C:\Projects\Enterprise\Caching\RedisCacheService.cs:line 54
+   at Enterprise.Services.UserService.GetUserProfileAsync(Int32 userId) in C:\Projects\Enterprise\Services\UserService.cs:line 112
+2026-09-03 08:06:22.150 [WARN] [RedisCache] Falling back to DistributedMemoryCache for user session cache.
+2026-09-03 08:08:44.200 [WARN] [AuthService] Failed login attempt for user 'admin' from IP 185.220.101.5 (Invalid Password - Attempt 1/5)
+2026-09-03 08:08:46.410 [WARN] [AuthService] Failed login attempt for user 'admin' from IP 185.220.101.5 (Invalid Password - Attempt 2/5)
+2026-09-03 08:08:48.800 [WARN] [AuthService] Failed login attempt for user 'admin' from IP 185.220.101.5 (Invalid Password - Attempt 3/5)
+2026-09-03 08:08:50.120 [WARN] [AuthService] Failed login attempt for user 'admin' from IP 185.220.101.5 (Invalid Password - Attempt 4/5)
+2026-09-03 08:08:52.330 [ERROR] [SecurityGuard] Potential brute-force attack detected from IP 185.220.101.5 targeting account 'admin'. IP temporarily blocked for 3600 seconds.
+   at Enterprise.Security.SecurityGuard.BlockIpAddress(String ip, TimeSpan duration) in C:\Projects\Enterprise\Security\SecurityGuard.cs:line 88
+   at Enterprise.Controllers.AuthController.Login(LoginRequest dto) in C:\Projects\Enterprise\Controllers\AuthController.cs:line 64
+2026-09-03 08:10:00.000 [INFO] [System.Cleanup] Executing routine database index defragmentation job...
+2026-09-03 08:12:15.550 [WARN] [DatabaseService] Database connection pool capacity warning: 46/50 connections active (92% usage).
+2026-09-03 08:13:01.002 [ERROR] [DatabaseService] SqlException: Execution Timeout Expired. The timeout period elapsed prior to completion of the operation or the server is not responding.
+   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
+   at Enterprise.DataAccess.Repositories.OrderRepository.GetPendingOrdersDetailedAsync() in C:\Projects\Enterprise\Repositories\OrderRepository.cs:line 145
+2026-09-03 08:13:02.100 [ERROR] [DatabaseService] SqlException: Execution Timeout Expired. Query: 'SELECT * FROM Orders WITH (NOLOCK) INNER JOIN OrderItems ON Orders.Id = OrderItems.OrderId WHERE Orders.Status = 2'
+2026-09-03 08:15:30.900 [WARN] [PaymentGateway] Payment provider API (Iyzipay / Stripe) returned HTTP 429 Too Many Requests. Retrying request (Attempt 1/3)...
+2026-09-03 08:15:35.950 [WARN] [PaymentGateway] Payment provider API returned HTTP 429 Too Many Requests. Retrying request (Attempt 2/3)...
+2026-09-03 08:15:41.005 [ERROR] [PaymentGateway] HttpRequestException: Payment Gateway processing failed for Order #99104. HTTP 504 Gateway Timeout from https://api.payment-provider.com/v2/transactions/charge
+   at System.Net.Http.HttpClient.HandleFailure(HttpResponseMessage response)
+   at Enterprise.Services.PaymentService.ChargeAsync(PaymentRequest request) in C:\Projects\Enterprise\Services\PaymentService.cs:line 204
+   at Enterprise.Controllers.CheckoutController.ProcessCheckout(CheckoutDto dto) in C:\Projects\Enterprise\Controllers\CheckoutController.cs:line 92
+2026-09-03 08:18:20.400 [INFO] [NotificationService] SMS notification sent to +90532****** for Order #99101 (Provider: Twilio)
+2026-09-03 08:20:00.000 [INFO] [MetricsCollector] System Health Check: CPU 14%, Memory 4.2GB / 16GB, Active Threads: 42
+2026-09-03 08:22:14.310 [ERROR] [TokenService] SecurityTokenExpiredException: Token expired at '2026-09-03 08:00:00 UTC'. Token ID: 'jwt_claim_778129'. Access denied for endpoint '/api/user/settings'.
+2026-09-03 08:25:00.800 [ERROR] [MicroserviceClient] HttpRequestException: 503 Service Unavailable received from downstream service 'http://inventory-service.prod.local/api/v1/stock/reserve'.
+   at Enterprise.Clients.InventoryClient.ReserveStockAsync(List`1 items) in C:\Projects\Enterprise\Clients\InventoryClient.cs:line 78
+2026-09-03 08:25:02.100 [ERROR] [MicroserviceClient] HttpRequestException: 503 Service Unavailable received from downstream service 'http://inventory-service.prod.local/api/v1/stock/reserve'.
+2026-09-03 08:28:40.110 [ERROR] [RabbitMQBroker] SocketException: Connection reset by peer. RabbitMQ Node 'amqp://rabbitmq-cluster.local:5672' went offline unexpected.
+   at RabbitMQ.Client.Impl.Frame.ReadFrom(NetworkBinaryReader reader)
+   at RabbitMQ.Client.Impl.Connection.MainLoop()
+2026-09-03 08:28:45.000 [INFO] [RabbitMQBroker] Re-establishing socket connection to fallback node 'amqp://rabbitmq-backup.local:5672'... Connection SUCCESSFUL.
+2026-09-03 08:30:10.500 [WARN] [MemoryManager] Large Object Heap (LOH) fragmentation high: 410MB allocated in LOH.
+2026-09-03 08:31:00.220 [ERROR] [ReportExportService] OutOfMemoryException: Exception of type 'System.OutOfMemoryException' was thrown while building Excel report for 500,000 log records.
+   at System.GC.AllocateNewArray(Int32 length)
+   at System.IO.MemoryStream.set_Capacity(Int32 value)
+   at Enterprise.Services.ReportExportService.ExportLogsToExcelAsync(ReportFilter filter) in C:\Projects\Enterprise\Services\ReportExportService.cs:line 315
+2026-09-03 08:32:15.000 [FATAL] [System.Hosting] Critical unhandled exception in background worker task 'ReportWorkerProcess'. Process crash prevented by GlobalExceptionHandler.
+2026-09-03 08:35:00.000 [INFO] [SystemMonitor] Garbage Collection (GC Gen 2) sweep completed. Freed 1.4GB unmanaged memory.
+2026-09-03 08:40:12.900 [INFO] [AuthService] User 'finance_manager' logged in successfully.
+2026-09-03 08:45:00.000 [INFO] [SystemMonitor] System operational status: STABLE. Active HTTP connections: 120

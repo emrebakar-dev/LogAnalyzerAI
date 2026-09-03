@@ -52,3 +52,4 @@ Açılan web arayüzünden (`http://localhost:5230` veya `http://localhost:5000`
 - `04_clean_system_healthy.log`: Sağlıklı sistem logları.
 - `05_disk_memory_resource_exhaustion.log`: Disk doluluğu (IOException) & RAM tüketim krizleri (OutOfMemoryException).
 - `06_mixed_malformed_log_format.log`: Karışık log formatları, bozuk satırlar ve esnek parser testi.
+- `07_enterprise_mixed_complex_master.log`: Çoklu servisler (Database, Redis, Payment, Brute Force, RabbitMQ, OutOfMemory) içeren kapsamlı master kurumsal log dosyası.
